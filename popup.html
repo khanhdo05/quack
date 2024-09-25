@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Apply Links</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 10px; }
+        .input-container { display: flex; align-items: center; margin-bottom: 10px; }
+        input { flex: 1; padding: 5px; }
+        .copy-icon { cursor: pointer; margin-left: 5px; width: 20px; height: 20px; } /* Adjust the width and height as needed */
+        .icon { margin-left: 5px; width: 20px; height: 20px; margin-right: 5px;}
+    </style>
+</head>
+<body>
+<h3>Quack make it Quick</h3>
+<div class="input-container">
+    <label for="github">GitHub</label>
+    <img src="github.png" id="githubIcon" class="icon" alt="GitHub">
+    <input type="text" id="github" placeholder="GitHub Profile Link">
+    <img src="copy-icon.png" id="copyGithub" class="copy-icon" alt="Copy">
+</div>
+<div class="input-container">
+    <label for="linkedin">LinkedIn</label>
+    <img src="linkedin.png" id="linkedInIcon" class="icon" alt="LinkedIn">
+    <input type="text" id="linkedin" placeholder="LinkedIn Profile Link">
+    <img src="copy-icon.png" id="copyLinkedin" class="copy-icon" alt="Copy">
+</div>
+<div class="input-container">
+    <label for="portfolio">Portfolio</label>
+    <img src="duck.png" id="portfolioIcon" class="icon" alt="Portfolio">
+    <input type="text" id="portfolio" placeholder="Portfolio Link">
+    <img src="copy-icon.png" id="copyPortfolio" class="copy-icon" alt="Copy">
+</div>
+<button id="save">Save Links</button>
+
+<script src="popup.js"></script>
+</body>
+</html>

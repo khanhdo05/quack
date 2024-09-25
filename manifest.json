@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "quack",
+  "description": "Easily copy-paste job application links (GitHub, LinkedIn, portfolio) with one click.",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "duck.png"
+  },
+  "permissions": [
+    "clipboardWrite",
+    "storage"
+  ]
+}

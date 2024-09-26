@@ -20,3 +20,5 @@ Google Docs on creating Chrome extensions:
 https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world
 
 <a href="https://www.flaticon.com/free-icons/duck" title="duck icons">Duck icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/virus" title="virus icons">Virus icons created by Freepik - Flaticon</a>

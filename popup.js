@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save all links
         chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }, () => {
-            showSnackbar('Links saved!');
+            showSnackbar('links saved!');
         });
     });
 
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
-            showSnackbar('Copied to clipboard!');
+            showSnackbar('copied to clipboard!');
         });
     }
 
@@ -78,28 +78,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const newLinkContainer = document.createElement('div');
         newLinkContainer.className = 'input-container';
     
-        const newNameLabel = document.createElement('label');
-        newNameLabel.className = 'label';
-        newNameLabel.textContent = 'Site';
+        const newNameLabel = document.createElement('img');
+        newNameLabel.className = 'icon';
+        newNameLabel.src = 'utils/duck.png';
         newLinkContainer.appendChild(newNameLabel);
     
         const newNameInput = document.createElement('input');
-        newNameInput.type = 'text';
+        newNameInput.type = 'type';
         newNameInput.placeholder = 'Site';
         newNameInput.value = name; // Pre-fill if provided
         newNameInput.className = 'short-input'; // Apply the short input class
         newLinkContainer.appendChild(newNameInput);
-    
-        const newLinkLabel = document.createElement('label');
-        newLinkLabel.className = 'label';
-        newLinkLabel.textContent = 'URL';
-        newLinkContainer.appendChild(newLinkLabel);
     
         const newLinkInput = document.createElement('input');
         newLinkInput.type = 'text';
         newLinkInput.placeholder = 'URL';
         newLinkInput.value = url; // Pre-fill if provided
         newLinkContainer.appendChild(newLinkInput);
+
+        // Create and add delete button
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'x';
+        deleteButton.title = 'delete field';
+        deleteButton.className = 'button-35 delete-button'; // Add class for styling if needed
+        deleteButton.addEventListener('click', () => {
+            newLinkContainer.remove(); // Remove the custom link container
+        });
+        newLinkContainer.appendChild(deleteButton);
     
         const newCopyIcon = document.createElement('img');
         newCopyIcon.src = 'utils/copy-icon.png';
@@ -109,15 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
             copyToClipboard(newLinkInput.value);
         });
         newLinkContainer.appendChild(newCopyIcon);
-    
-        // Create and add delete button
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'x';
-        deleteButton.className = 'delete-button'; // Add class for styling if needed
-        deleteButton.addEventListener('click', () => {
-            newLinkContainer.remove(); // Remove the custom link container
-        });
-        newLinkContainer.appendChild(deleteButton);
     
         customLinksContainer.appendChild(newLinkContainer);
     }    

@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         const newNameLabel = document.createElement('img');
         newNameLabel.className = 'icon';
-        newNameLabel.src = 'duck.png';
+        newNameLabel.src = 'utils/duck.png';
         newLinkContainer.appendChild(newNameLabel);
     
         const newNameInput = document.createElement('input');
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newLinkContainer.appendChild(deleteButton);
     
         const newCopyIcon = document.createElement('img');
-        newCopyIcon.src = 'copy-icon.png';
+        newCopyIcon.src = 'utils/copy-icon.png';
         newCopyIcon.className = 'copy-icon';
         newCopyIcon.alt = 'Copy';
         newCopyIcon.addEventListener('click', () => {

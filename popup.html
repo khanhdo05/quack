@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <a href="https://github.com/khanhdo05/quack" target="_blank" class="bug-report" title="go to github">
+    <a href="https://github.com/khanhdo05/quack" target="_blank" class="bug-report" title="Report Bug">
         <img src="utils/bug-icon.png" alt="Report Bug" class="bug-icon">
     </a>
     <h1 class="title">Quack</h1>
@@ -37,9 +37,12 @@
         <img src="utils/copy-icon.png" id="copyPortfolio" class="copy-icon" alt="Copy">
     </div>
     <div id="custom-links"></div>
-
-    <button id="addLink" class="button-35" title="add custom link">+</button>
-    <button id="save" class="button-35" title="save links">Saves</button>
+    <div class="button-container">
+        <button id="addLink" class="button-35" title="add custom link">+</button>
+        <button id="save" class="button-35" title="save links">Save</button>
+        <button id="autoSave" class="button-35 auto-save-enabled" title="toggle auto-save">Auto-save</button>
+        <button id="settingsButton" class="button-35" title="edit custom links">Edit</button>
+    </div>
     <div id="snackbar" class="snackbar"></div>
     <script src="popup.js"></script>
 </body>

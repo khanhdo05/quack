@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateAutoSaveButton(isEnabled) {
         if (isEnabled) {
-            autoSaveButton.classList.add('auto-save-enabled');
             autoSaveButton.classList.remove('auto-save-disabled');
+            autoSaveButton.classList.add('auto-save-enabled');
         } else {
             autoSaveButton.classList.remove('auto-save-enabled');
             autoSaveButton.classList.add('auto-save-disabled');
@@ -57,16 +57,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 url: inputs[1].value    // Link URL
             };
         });
-        
-        if (autoSaveButton.classList.contains('auto-save-enabled')) {
-            chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }, () => {
-                showSnackbar('Links saved!');
-            });
-        }
+
+        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }).then(() => showSnackbar('Saved!'));
     }
 
     // Modify existing save button click event
-    document.getElementById('save').addEventListener('click', saveAllLinks);
+    document.getElementById('save').addEventListener('click', () => {
+        saveAllLinks()
+    });
 
     // Add input event listeners for auto-save
     [githubInput, linkedinInput, portfolioInput].forEach(input => {
@@ -92,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
-            showSnackbar('copied to clipboard!');
+            showSnackbar('Copied to clipboard!');
         });
     }
 

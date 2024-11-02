@@ -172,7 +172,7 @@ input {
     margin-left: 5px;
 }
 
-.button-35.save-button, .button-35.auto-save-enabled {
+.button-35.save-button, .button-35.auto-save-enabled, .button-35.auto-save-disabled {
     height: 20px;
     flex: none;
     width: min-content;

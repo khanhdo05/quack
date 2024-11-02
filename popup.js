@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newNameInput = document.createElement('input');
         newNameInput.className = 'custom-name';
         newNameInput.type = 'type';
-        newNameInput.placeholder = 'Site';
+        newNameInput.placeholder = 'site';
         newNameInput.value = name; // Pre-fill if provided
         newLinkContainer.appendChild(newNameInput);
 
@@ -164,6 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
         });
         newLinkInput.addEventListener('input', () => {
+            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+        });
+
+        deleteButton.addEventListener('click', () => {
             if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
         });
 

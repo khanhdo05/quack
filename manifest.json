@@ -2,15 +2,15 @@
   "manifest_version": 3,
   "name": "quack",
   "description": "Quickly copy-paste GitHub, LinkedIn, and portfolio links for job applications using Quack.",
-  "version": "0.0.0.1",
+  "version": "0.0.0.2",
   "icons": {
-    "16": "duck.png",
-    "48": "duck.png",
-    "128": "duck.png"
+    "16": "utils/duck.png",
+    "48": "utils/duck.png",
+    "128": "utils/duck.png"
   },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "duck.png"
+    "default_icon": "utils/duck.png"
   },
   "permissions": [
     "clipboardWrite",

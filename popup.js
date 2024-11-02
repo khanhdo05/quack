@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const linkedinInput = document.getElementById('linkedin');
     const portfolioInput = document.getElementById('portfolio');
     const customLinksContainer = document.getElementById('custom-links');
+    const autoSaveButton = document.getElementById('autoSave');
 
     // Load saved links from Chrome storage
     chrome.storage.sync.get(['github', 'linkedin', 'portfolio', 'customLinks'], (result) => {
@@ -18,13 +19,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Save links
-    document.getElementById('save').addEventListener('click', () => {
+    // Load auto-save preference
+    chrome.storage.sync.get(['autoSave'], (result) => {
+        const isAutoSaveEnabled = result.autoSave !== undefined ? result.autoSave : true;
+        updateAutoSaveButton(isAutoSaveEnabled);
+    });
+
+    autoSaveButton.addEventListener('click', toggleAutoSave);
+
+    function toggleAutoSave() {
+        const isCurrentlyEnabled = autoSaveButton.classList.contains('auto-save-enabled');
+        const newAutoSaveState = !isCurrentlyEnabled;
+        chrome.storage.sync.set({ autoSave: newAutoSaveState });
+        updateAutoSaveButton(newAutoSaveState);
+    }
+
+    function updateAutoSaveButton(isEnabled) {
+        if (isEnabled) {
+            autoSaveButton.classList.remove('auto-save-disabled');
+            autoSaveButton.classList.add('auto-save-enabled');
+        } else {
+            autoSaveButton.classList.remove('auto-save-enabled');
+            autoSaveButton.classList.add('auto-save-disabled');
+        }
+    }
+
+    // Function to save all links
+    function saveAllLinks() {
         const github = githubInput.value;
         const linkedin = linkedinInput.value;
         const portfolio = portfolioInput.value;
 
-        // Collect custom links
         const customLinks = Array.from(customLinksContainer.children).map(linkContainer => {
             const inputs = linkContainer.querySelectorAll('input');
             return {
@@ -33,9 +58,18 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        // Save all links
-        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }, () => {
-            showSnackbar('links saved!');
+        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }).then(() => showSnackbar('Saved!'));
+    }
+
+    // Modify existing save button click event
+    document.getElementById('save').addEventListener('click', () => {
+        saveAllLinks()
+    });
+
+    // Add input event listeners for auto-save
+    [githubInput, linkedinInput, portfolioInput].forEach(input => {
+        input.addEventListener('input', () => {
+            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
         });
     });
 
@@ -56,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
-            showSnackbar('copied to clipboard!');
+            showSnackbar('Copied to clipboard!');
         });
     }
 
@@ -76,24 +110,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addCustomLink(name = '', url = '') {
         const newLinkContainer = document.createElement('div');
-        newLinkContainer.className = 'input-container';
-    
+        newLinkContainer.className = 'input-container custom-link';
+
         const newNameLabel = document.createElement('img');
         newNameLabel.className = 'icon';
         newNameLabel.src = 'utils/duck.png';
         newLinkContainer.appendChild(newNameLabel);
-    
+
         const newNameInput = document.createElement('input');
+        newNameInput.className = 'custom-name';
         newNameInput.type = 'type';
-        newNameInput.placeholder = 'Site';
+        newNameInput.placeholder = 'site';
         newNameInput.value = name; // Pre-fill if provided
-        newNameInput.className = 'short-input'; // Apply the short input class
         newLinkContainer.appendChild(newNameInput);
-    
+
         const newLinkInput = document.createElement('input');
         newLinkInput.type = 'text';
-        newLinkInput.placeholder = 'URL';
-        newLinkInput.value = url; // Pre-fill if provided
+        newLinkInput.value = url;
+        newLinkInput.className = 'custom-link-url';
+        newLinkInput.placeholder = 'Enter URL';
         newLinkContainer.appendChild(newLinkInput);
 
         // Create and add delete button
@@ -105,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             newLinkContainer.remove(); // Remove the custom link container
         });
         newLinkContainer.appendChild(deleteButton);
-    
+
         const newCopyIcon = document.createElement('img');
         newCopyIcon.src = 'utils/copy-icon.png';
         newCopyIcon.className = 'copy-icon';
@@ -114,7 +149,31 @@ document.addEventListener('DOMContentLoaded', () => {
             copyToClipboard(newLinkInput.value);
         });
         newLinkContainer.appendChild(newCopyIcon);
-    
+
         customLinksContainer.appendChild(newLinkContainer);
-    }    
+
+        // Add input event listeners for auto-save
+        newNameInput.addEventListener('input', () => {
+            if (newNameInput.textContent.trim() !== '') {
+                newNameInput.classList.remove('empty');
+            } else {
+                newNameInput.classList.add('empty');
+            }
+            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+        });
+        newLinkInput.addEventListener('input', () => {
+            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+        });
+
+        deleteButton.addEventListener('click', () => {
+            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+        });
+
+        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+    }
+
+    // Add event listener for window unload
+    window.addEventListener('unload', () => {
+        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+    });
 });

@@ -37,7 +37,7 @@ input {
     height: 20px;
     margin-right: 5px;
 }
-.label, .custom-link-name {
+.label{
     min-width: 80px;
     max-width: 80px; /* Set a maximum width */
     margin-right: 5px;
@@ -51,22 +51,27 @@ input {
     text-overflow: ellipsis; /* Add ellipsis for overflowing text */
 }
 
-.custom-link-name {
+.custom-name {
+    /* Reset input-specific styles */
     outline: none;
+    border: 0;
+    background: none;
     padding: 2px;
-}
-
-.custom-link-name[contenteditable="true"] {
     border-bottom: 1px solid #ccc;
-}
 
-.custom-link-name.empty:before {
-    content: attr(data-placeholder);
-    color: #888;
-}
-
-.custom-link-name:focus:before {
-    content: '';
+    /* Label-like styling */
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    color: #282828;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-optical-sizing: auto;
+    min-width: 80px;
+    max-width: 80px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
 
 .custom-link-url {

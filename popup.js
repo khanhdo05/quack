@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const portfolioInput = document.getElementById('portfolio');
     const customLinksContainer = document.getElementById('custom-links');
     const autoSaveButton = document.getElementById('autoSave');
+    let manualSave = false; // Flag to track if the save is manual
 
     // Load saved links from Chrome storage
     chrome.storage.sync.get(['github', 'linkedin', 'portfolio', 'customLinks'], (result) => {
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Function to save all links
-    function saveAllLinks() {
+    function saveAllLinks(isManual = false) {
         const github = githubInput.value;
         const linkedin = linkedinInput.value;
         const portfolio = portfolioInput.value;
@@ -58,12 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }).then(() => showSnackbar('Saved!'));
+        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }).then(() => {
+            if (isManual) {
+                showSnackbar('Saved!');
+            }
+        });
     }
 
     // Modify existing save button click event
     document.getElementById('save').addEventListener('click', () => {
-        saveAllLinks()
+        manualSave = true; // Mark as manual save
+        saveAllLinks(true); // Pass `true` to trigger the snackbar
     });
 
     // Add input event listeners for auto-save
@@ -138,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteButton.className = 'button-35 delete-button'; // Add class for styling if needed
         deleteButton.addEventListener('click', () => {
             newLinkContainer.remove(); // Remove the custom link container
+            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
         });
         newLinkContainer.appendChild(deleteButton);
 

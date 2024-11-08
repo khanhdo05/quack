@@ -108,70 +108,113 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    function addCustomLink(name = '', url = '') {
-        const newLinkContainer = document.createElement('div');
-        newLinkContainer.className = 'input-container custom-link';
+/**
+ * Fetches the favicon (website icon) for a specified URL.
+ *
+ * This function constructs a URL for the favicon using Google’s favicon service 
+ * and attempts to load it as an image. If successful, it returns the favicon URL;
+ * if unsuccessful, it returns null and logs an error message.
+ */
+async function getFavicon(url) {
+    try {
+        // Construct the favicon URL using Google's favicon service
+        const faviconUrl = `https://www.google.com/s2/favicons?domain=${url}`;
+        
+        const img = new Image();
+        img.src = faviconUrl;
 
-        const newNameLabel = document.createElement('img');
-        newNameLabel.className = 'icon';
-        newNameLabel.src = 'utils/duck.png';
-        newLinkContainer.appendChild(newNameLabel);
-
-        const newNameInput = document.createElement('input');
-        newNameInput.className = 'custom-name';
-        newNameInput.type = 'type';
-        newNameInput.placeholder = 'site';
-        newNameInput.value = name; // Pre-fill if provided
-        newLinkContainer.appendChild(newNameInput);
-
-        const newLinkInput = document.createElement('input');
-        newLinkInput.type = 'text';
-        newLinkInput.value = url;
-        newLinkInput.className = 'custom-link-url';
-        newLinkInput.placeholder = 'Enter URL';
-        newLinkContainer.appendChild(newLinkInput);
-
-        // Create and add delete button
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'x';
-        deleteButton.title = 'delete field';
-        deleteButton.className = 'button-35 delete-button'; // Add class for styling if needed
-        deleteButton.addEventListener('click', () => {
-            newLinkContainer.remove(); // Remove the custom link container
+        return new Promise((resolve, reject) => {
+            img.onload = () => resolve(faviconUrl); // Resolve with the favicon URL
+            img.onerror = () => reject(new Error('Favicon not found')); // Reject if not found
         });
-        newLinkContainer.appendChild(deleteButton);
+    } catch (error) {
+        console.error('Error fetching favicon:', error);
+        return null;
+    }
+}
 
-        const newCopyIcon = document.createElement('img');
-        newCopyIcon.src = 'utils/copy-icon.png';
-        newCopyIcon.className = 'copy-icon';
-        newCopyIcon.alt = 'Copy';
-        newCopyIcon.addEventListener('click', () => {
-            copyToClipboard(newLinkInput.value);
-        });
-        newLinkContainer.appendChild(newCopyIcon);
+/**
+ * Adds a custom link with an associated icon, name, and URL input fields to the UI.
+ *
+ * This function creates a container for a new link entry, which includes:
+ * - An icon representing the link (fetched from the provided URL if available)
+ * - Input fields for the site name and URL
+ * - A delete button to remove the link entry from the UI
+ * - A copy icon for copying the URL to the clipboard
+ */
+async function addCustomLink(name = '', url = '') {
+    const newLinkContainer = document.createElement('div');
+    newLinkContainer.className = 'input-container custom-link';
 
-        customLinksContainer.appendChild(newLinkContainer);
+    const newNameLabel = document.createElement('img');
+    newNameLabel.className = 'icon';
+    newNameLabel.src = 'utils/duck.png'; // Default icon
+    newLinkContainer.appendChild(newNameLabel);
 
-        // Add input event listeners for auto-save
-        newNameInput.addEventListener('input', () => {
-            if (newNameInput.textContent.trim() !== '') {
-                newNameInput.classList.remove('empty');
-            } else {
-                newNameInput.classList.add('empty');
-            }
-            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
-        });
-        newLinkInput.addEventListener('input', () => {
-            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
-        });
+    const newNameInput = document.createElement('input');
+    newNameInput.className = 'custom-name';
+    newNameInput.type = 'text';
+    newNameInput.placeholder = 'site';
+    newNameInput.value = name; // Pre-fill if provided
+    newLinkContainer.appendChild(newNameInput);
 
-        deleteButton.addEventListener('click', () => {
-            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
-        });
+    const newLinkInput = document.createElement('input');
+    newLinkInput.type = 'text';
+    newLinkInput.value = url;
+    newLinkInput.className = 'custom-link-url';
+    newLinkInput.placeholder = 'Enter URL';
+    newLinkContainer.appendChild(newLinkInput);
 
-        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+    // Create and add delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'x';
+    deleteButton.title = 'Delete field';
+    deleteButton.className = 'button-35 delete-button';
+    deleteButton.addEventListener('click', () => {
+        newLinkContainer.remove(); // Remove the custom link container
+    });
+    newLinkContainer.appendChild(deleteButton);
+
+    const newCopyIcon = document.createElement('img');
+    newCopyIcon.src = 'utils/copy-icon.png';
+    newCopyIcon.className = 'copy-icon';
+    newCopyIcon.alt = 'Copy';
+    newCopyIcon.addEventListener('click', () => {
+        copyToClipboard(newLinkInput.value); // Copy the link URL to the clipboard
+    });
+    newLinkContainer.appendChild(newCopyIcon);
+
+    customLinksContainer.appendChild(newLinkContainer);
+
+    // Fetch favicon and update the icon if found
+    if (url) {
+        const favicon = await getFavicon(new URL(url).hostname);
+        if (favicon) {
+            newNameLabel.src = favicon; // Update icon if favicon is found
+        }
     }
 
+    // Add input event listeners for auto-save functionality
+    newNameInput.addEventListener('input', () => {
+        if (newNameInput.value.trim() !== '') {
+            newNameInput.classList.remove('empty');
+        } else {
+            newNameInput.classList.add('empty');
+        }
+        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+    });
+
+    newLinkInput.addEventListener('input', () => {
+        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+    });
+
+    deleteButton.addEventListener('click', () => {
+        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+    });
+
+    if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+}
+    
     // Add event listener for window unload
     window.addEventListener('unload', () => {
         if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();

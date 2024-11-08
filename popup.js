@@ -214,7 +214,6 @@ async function addCustomLink(name = '', url = '') {
 
     if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
 }
-
     
     // Add event listener for window unload
     window.addEventListener('unload', () => {

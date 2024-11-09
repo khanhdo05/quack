@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function saveIfEnter(inputElement) {
+        inputElement.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();  // Prevents any default form submission
+                saveAllLinks();
+                showSnackbar('Saved!');
+            }
+        });
+    }
+
     // Load saved links from Chrome storage
     chrome.storage.sync.get(['github', 'linkedin', 'portfolio', 'customLinks'], (result) => {
         if (result.github) githubInput.value = result.github;
@@ -49,6 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function toggleAutoSave() {
         const isCurrentlyEnabled = isAutoSaveEnabled();
+        if (isCurrentlyEnabled) {
+            showSnackbar('Auto-save disabled');
+        } else {
+            showSnackbar('Auto-save enabled');
+        }
         const newAutoSaveState = !isCurrentlyEnabled;
         chrome.storage.sync.set({ autoSave: newAutoSaveState });
         updateAutoSaveButton(newAutoSaveState);
@@ -64,8 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
             autoSaveButton.classList.add('auto-save-disabled');
         }
     }
+
     // Set up auto-save for main inputs
     [githubInput, linkedinInput, portfolioInput].forEach(initializeAutoSave);
+
+    // Set up save if enter
+    [githubInput, linkedinInput, portfolioInput].forEach(saveIfEnter);
 
     // Function to save all links
     function saveAllLinks() {
@@ -88,8 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Links saved successfully.");
             if (!isAutoSaveEnabled()) {
                 showSnackbar('Saved!');
-            } else {
-                showSnackbar('Auto-saved!');
             }
         })
         .catch(error => {
@@ -222,7 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Attach auto-save to each custom input
         initializeAutoSave(newNameInput);
+        saveIfEnter(newNameInput);
         initializeAutoSave(newLinkInput);
+        saveIfEnter(newLinkInput);
 
         conditionalSave();
 

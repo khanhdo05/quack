@@ -58,7 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }).then(() => showSnackbar('Saved!'));
+        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }).then(() => {
+            if (!autoSaveButton.classList.contains('auto-save-enabled')) showSnackbar('Saved!')
+        });
     }
 
     // Modify existing save button click event

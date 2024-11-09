@@ -4,6 +4,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const portfolioInput = document.getElementById('portfolio');
     const customLinksContainer = document.getElementById('custom-links');
     const autoSaveButton = document.getElementById('autoSave');
+    const autoSaveDisabledString = 'auto-save-disabled';
+    const autoSaveEnabledString = 'auto-save-enabled';
+
+    // Check if auto-save is enabled
+    function isAutoSaveEnabled() {
+        return autoSaveButton.classList.contains(autoSaveEnabledString);
+    }
+
+    // Conditional saving
+    function conditionalSave() {
+        console.log("Auto-save condition checked.");
+        if (isAutoSaveEnabled()) saveAllLinks();
+    }
+
+    // Initialize auto-save functionality on inputs
+    function initializeAutoSave(inputElement) {
+        inputElement.addEventListener('input', () => {
+            conditionalSave();
+        });
+    }
 
     // Load saved links from Chrome storage
     chrome.storage.sync.get(['github', 'linkedin', 'portfolio', 'customLinks'], (result) => {
@@ -28,12 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
     autoSaveButton.addEventListener('click', toggleAutoSave);
 
     function toggleAutoSave() {
-        const isCurrentlyEnabled = autoSaveButton.classList.contains('auto-save-enabled');
+        const isCurrentlyEnabled = isAutoSaveEnabled();
         const newAutoSaveState = !isCurrentlyEnabled;
         chrome.storage.sync.set({ autoSave: newAutoSaveState });
         updateAutoSaveButton(newAutoSaveState);
     }
 
+    // Handle auto-save toggle
     function updateAutoSaveButton(isEnabled) {
         if (isEnabled) {
             autoSaveButton.classList.remove('auto-save-disabled');
@@ -43,9 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
             autoSaveButton.classList.add('auto-save-disabled');
         }
     }
+    // Set up auto-save for main inputs
+    [githubInput, linkedinInput, portfolioInput].forEach(initializeAutoSave);
 
     // Function to save all links
     function saveAllLinks() {
+        console.log("Saving all links...");
+
         const github = githubInput.value;
         const linkedin = linkedinInput.value;
         const portfolio = portfolioInput.value;
@@ -58,21 +83,24 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks }).then(() => {
-            if (!autoSaveButton.classList.contains('auto-save-enabled')) showSnackbar('Saved!')
+        chrome.storage.sync.set({ github, linkedin, portfolio, customLinks })
+        .then(() => {
+            console.log("Links saved successfully.");
+            if (!isAutoSaveEnabled()) {
+                showSnackbar('Saved!');
+            } else {
+                showSnackbar('Auto-saved!');
+            }
+        })
+        .catch(error => {
+            showSnackbar('Error saving links');
+            console.error("Error saving links:", error);
         });
     }
 
     // Modify existing save button click event
     document.getElementById('save').addEventListener('click', () => {
         saveAllLinks()
-    });
-
-    // Add input event listeners for auto-save
-    [githubInput, linkedinInput, portfolioInput].forEach(input => {
-        input.addEventListener('input', () => {
-            if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
-        });
     });
 
     // Copy GitHub link
@@ -110,115 +138,116 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-/**
- * Fetches the favicon (website icon) for a specified URL.
- *
- * This function constructs a URL for the favicon using Google’s favicon service 
- * and attempts to load it as an image. If successful, it returns the favicon URL;
- * if unsuccessful, it returns null and logs an error message.
- */
-async function getFavicon(url) {
-    try {
-        // Construct the favicon URL using Google's favicon service
-        const faviconUrl = `https://www.google.com/s2/favicons?domain=${url}`;
-        
-        const img = new Image();
-        img.src = faviconUrl;
+    /**
+     * Fetches the favicon (website icon) for a specified URL.
+     *
+     * This function constructs a URL for the favicon using Google’s favicon service 
+     * and attempts to load it as an image. If successful, it returns the favicon URL;
+     * if unsuccessful, it returns null and logs an error message.
+     */
+    async function getFavicon(url) {
+        try {
+            // Construct the favicon URL using Google's favicon service
+            const faviconUrl = `https://www.google.com/s2/favicons?domain=${url}`;
+            
+            const img = new Image();
+            img.src = faviconUrl;
 
-        return new Promise((resolve, reject) => {
-            img.onload = () => resolve(faviconUrl); // Resolve with the favicon URL
-            img.onerror = () => reject(new Error('Favicon not found')); // Reject if not found
+            return new Promise((resolve, reject) => {
+                img.onload = () => resolve(faviconUrl); // Resolve with the favicon URL
+                img.onerror = () => {
+                    img.src = 'utils/duck.png'; // Default icon
+                    reject(new Error('Favicon not found'));
+                } // Reject if not found
+            });
+        } catch (error) {
+            console.error('Error fetching favicon:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Adds a custom link with an associated icon, name, and URL input fields to the UI.
+     *
+     * This function creates a container for a new link entry, which includes:
+     * - An icon representing the link (fetched from the provided URL if available)
+     * - Input fields for the site name and URL
+     * - A delete button to remove the link entry from the UI
+     * - A copy icon for copying the URL to the clipboard
+     */
+    async function addCustomLink(name = '', url = '') {
+        const newLinkContainer = document.createElement('div');
+        newLinkContainer.className = 'input-container custom-link';
+
+        const newNameLabel = document.createElement('img');
+        newNameLabel.className = 'icon';
+        newNameLabel.src = 'utils/duck.png'; // Default icon
+        newLinkContainer.appendChild(newNameLabel);
+
+        const newNameInput = document.createElement('input');
+        newNameInput.className = 'custom-name';
+        newNameInput.type = 'text';
+        newNameInput.placeholder = 'site';
+        newNameInput.value = name; // Pre-fill if provided
+        newLinkContainer.appendChild(newNameInput);
+
+        const newLinkInput = document.createElement('input');
+        newLinkInput.type = 'text';
+        newLinkInput.value = url;
+        newLinkInput.className = 'custom-link-url';
+        newLinkInput.placeholder = 'Enter URL';
+        newLinkContainer.appendChild(newLinkInput);
+
+        // Create and add delete button
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'x';
+        deleteButton.title = 'Delete field';
+        deleteButton.className = 'button-35 delete-button';
+        deleteButton.addEventListener('click', () => {
+            newLinkContainer.remove(); // Remove the custom link container
+            conditionalSave();
         });
-    } catch (error) {
-        console.error('Error fetching favicon:', error);
-        return null;
-    }
-}
+        newLinkContainer.appendChild(deleteButton);
 
-/**
- * Adds a custom link with an associated icon, name, and URL input fields to the UI.
- *
- * This function creates a container for a new link entry, which includes:
- * - An icon representing the link (fetched from the provided URL if available)
- * - Input fields for the site name and URL
- * - A delete button to remove the link entry from the UI
- * - A copy icon for copying the URL to the clipboard
- */
-async function addCustomLink(name = '', url = '') {
-    const newLinkContainer = document.createElement('div');
-    newLinkContainer.className = 'input-container custom-link';
+        const newCopyIcon = document.createElement('img');
+        newCopyIcon.src = 'utils/copy-icon.png';
+        newCopyIcon.className = 'copy-icon';
+        newCopyIcon.alt = 'Copy';
+        newCopyIcon.addEventListener('click', () => {
+            copyToClipboard(newLinkInput.value); // Copy the link URL to the clipboard
+        });
+        newLinkContainer.appendChild(newCopyIcon);
 
-    const newNameLabel = document.createElement('img');
-    newNameLabel.className = 'icon';
-    newNameLabel.src = 'utils/duck.png'; // Default icon
-    newLinkContainer.appendChild(newNameLabel);
+        customLinksContainer.appendChild(newLinkContainer);
 
-    const newNameInput = document.createElement('input');
-    newNameInput.className = 'custom-name';
-    newNameInput.type = 'text';
-    newNameInput.placeholder = 'site';
-    newNameInput.value = name; // Pre-fill if provided
-    newLinkContainer.appendChild(newNameInput);
+        // Attach auto-save to each custom input
+        initializeAutoSave(newNameInput);
+        initializeAutoSave(newLinkInput);
 
-    const newLinkInput = document.createElement('input');
-    newLinkInput.type = 'text';
-    newLinkInput.value = url;
-    newLinkInput.className = 'custom-link-url';
-    newLinkInput.placeholder = 'Enter URL';
-    newLinkContainer.appendChild(newLinkInput);
+        conditionalSave();
 
-    // Create and add delete button
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'x';
-    deleteButton.title = 'Delete field';
-    deleteButton.className = 'button-35 delete-button';
-    deleteButton.addEventListener('click', () => {
-        newLinkContainer.remove(); // Remove the custom link container
-    });
-    newLinkContainer.appendChild(deleteButton);
-
-    const newCopyIcon = document.createElement('img');
-    newCopyIcon.src = 'utils/copy-icon.png';
-    newCopyIcon.className = 'copy-icon';
-    newCopyIcon.alt = 'Copy';
-    newCopyIcon.addEventListener('click', () => {
-        copyToClipboard(newLinkInput.value); // Copy the link URL to the clipboard
-    });
-    newLinkContainer.appendChild(newCopyIcon);
-
-    customLinksContainer.appendChild(newLinkContainer);
-
-    // Fetch favicon and update the icon if found
-    if (url) {
-        const favicon = await getFavicon(new URL(url).hostname);
-        if (favicon) {
-            newNameLabel.src = favicon; // Update icon if favicon is found
-        }
+        // Fetch favicon asynchronously and update the icon if found
+        // if (url) {
+        //     updateFavicon(newNameLabel, url);
+        // }
     }
 
-    // Add input event listeners for auto-save functionality
-    newNameInput.addEventListener('input', () => {
-        if (newNameInput.value.trim() !== '') {
-            newNameInput.classList.remove('empty');
-        } else {
-            newNameInput.classList.add('empty');
+    /**
+     * Updates the favicon for a specified icon element using the URL provided.
+     */
+    async function updateFavicon(iconElement, url) {
+        try {
+            const favicon = await getFavicon(new URL(url).hostname);
+            if (favicon) {
+                iconElement.src = favicon;
+            }
+        } catch (error) {
+            console.error('Error fetching favicon:', error);
         }
-        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
-    });
-
-    newLinkInput.addEventListener('input', () => {
-        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
-    });
-
-    deleteButton.addEventListener('click', () => {
-        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
-    });
-
-    if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
-}
+    }
     
     // Add event listener for window unload
     window.addEventListener('unload', () => {
-        if (autoSaveButton.classList.contains('auto-save-enabled')) saveAllLinks();
+        conditionalSave();
     });
 });
